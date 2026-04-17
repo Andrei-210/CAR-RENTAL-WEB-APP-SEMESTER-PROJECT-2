@@ -1,6 +1,7 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface Branch {
@@ -9,10 +10,14 @@ interface Branch {
   county: string;
   address: string;
   phone: string;
-  hours: string;
+  hoursDisplay: string;
   fleet: string;
-  status: string;
   mapSrc: SafeResourceUrl;
+  openHour: number;
+  openMinute: number;
+  closeHour: number;
+  closeMinute: number;
+  weekdaysOnly: boolean;
 }
 
 interface ContactForm {
@@ -27,12 +32,15 @@ interface ContactForm {
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './contact.html',
   styleUrl: './contact.scss',
 })
-export class Contact {
+export class Contact implements OnInit, OnDestroy {
   formSent = false;
+  formCooldown = false;
+  cooldownSeconds = 0;
+  private cooldownInterval: ReturnType<typeof setInterval> | null = null;
 
   form: ContactForm = {
     firstName: '',
@@ -44,64 +52,73 @@ export class Contact {
   };
 
   activeBranch = 0;
-
   branches: Branch[];
 
   constructor(private sanitizer: DomSanitizer) {
     this.branches = [
       {
         id: 0,
-        name: 'Craiova — Central',
-        county: 'Dolj County, Romania',
-        address: '128 Calea București St., Craiova',
-        phone: '+40 251 100 200',
-        hours: 'Mon – Sun: 08:00 – 22:00',
-        fleet: 'Fleet: 24 vehicles available',
-        status: 'Open now',
+        name: 'Bucharest — Central',
+        county: 'Bucharest, Romania',
+        address: 'Șos. Kiseleff 1, București 011341',
+        phone: '+40 21 201 4000',
+        hoursDisplay: 'Mon – Fri: 09:00 – 17:00',
+        fleet: 'Fleet: 40 vehicles available',
         mapSrc: this.safe(
-          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d23.7959!3d44.3302!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40509b958a2e0c6f%3A0x3f2d3d9b5e4b4cdd!2sCraiova%2C+Romania!5e1!3m2!1sro!2sro!4v1700000000000'
+          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2848.5!2d26.0793!3d44.4532!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b202c0ddca51c7%3A0x5d0d6e7e7c7c7c7c!2sPalatul+Kiseleff!5e1!3m2!1sro!2sro!4v1700000010000'
         ),
+        openHour: 9, openMinute: 0, closeHour: 17, closeMinute: 0,
+        weekdaysOnly: true,
       },
       {
         id: 1,
-        name: 'Craiova — Airport',
-        county: 'Dolj County, Romania',
-        address: 'Craiova Airport, DN 6 km 228',
-        phone: '+40 251 100 300',
-        hours: 'Daily: 06:00 – 23:00',
-        fleet: 'Fleet: 18 vehicles available',
-        status: 'Open now',
-        mapSrc: this.safe(
-          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d23.8890!3d44.3182!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40509c7c7b0e4a4b%3A0x1c2e3d4f5a6b7c8d!2sCraiova+Airport!5e1!3m2!1sro!2sro!4v1700000000001'
-        ),
-      },
-      {
-        id: 2,
         name: 'Bucharest — Otopeni',
         county: 'Ilfov County, Romania',
-        address: '255 București–Ploiești Hwy, Otopeni',
-        phone: '+40 21 200 300',
-        hours: 'Daily: 05:30 – 00:30',
-        fleet: 'Fleet: 41 vehicles available',
-        status: 'Open now',
+        address: 'Calea București-Ploiești, Otopeni 075150',
+        phone: '+40 21 204 1000',
+        hoursDisplay: 'Daily: 07:00 – 23:30',
+        fleet: 'Fleet: 35 vehicles available',
         mapSrc: this.safe(
           'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d26.0850!3d44.5722!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40b202065b66b56d%3A0x5a7a52d5d4e4c0a0!2sHenri+Coanda+International+Airport!5e1!3m2!1sro!2sro!4v1700000000002'
         ),
+        openHour: 7, openMinute: 0, closeHour: 23, closeMinute: 30,
+        weekdaysOnly: false,
+      },
+      {
+        id: 2,
+        name: 'Cluj — Airport',
+        county: 'Cluj County, Romania',
+        address: 'Str. Traian Vuia 149, Cluj-Napoca 400397',
+        phone: '+40 264 416 702',
+        hoursDisplay: 'Daily: 07:00 – 23:30',
+        fleet: 'Fleet: 28 vehicles available',
+        mapSrc: this.safe(
+          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d23.6862!3d46.7852!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47490e7c4e4b4b4b%3A0x1c2e3d4f5a6b7c8d!2sCluj+International+Airport!5e1!3m2!1sro!2sro!4v1700000000005'
+        ),
+        openHour: 7, openMinute: 0, closeHour: 23, closeMinute: 30,
+        weekdaysOnly: false,
       },
       {
         id: 3,
-        name: 'Timișoara',
+        name: 'Timișoara — Airport',
         county: 'Timiș County, Romania',
-        address: '14 Circumvalațiunii St., Timișoara',
-        phone: '+40 256 100 400',
-        hours: 'Mon – Fri: 08:00 – 20:00 · Sat: 09:00 – 16:00',
-        fleet: 'Fleet: 15 vehicles available',
-        status: 'Open now',
+        address: 'Str. Aeroport 2, Ghiroda 307200',
+        phone: '+40 256 386 000',
+        hoursDisplay: 'Daily: 07:00 – 23:30',
+        fleet: 'Fleet: 17 vehicles available',
         mapSrc: this.safe(
-          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d21.2087!3d45.7489!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x474567ca7e5e4a7b%3A0x3d0a2b5c4e6f7a8b!2sTimișoara%2C+Romania!5e1!3m2!1sro!2sro!4v1700000000003'
+          'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d11512.6!2d21.3379!3d45.8099!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x474567ca7e5e4a7b%3A0x3d0a2b5c4e6f7a8b!2sTimișoara+International+Airport!5e1!3m2!1sro!2sro!4v1700000000006'
         ),
+        openHour: 7, openMinute: 0, closeHour: 23, closeMinute: 30,
+        weekdaysOnly: false,
       },
     ];
+  }
+
+  ngOnInit(): void {}
+
+  ngOnDestroy(): void {
+    if (this.cooldownInterval) clearInterval(this.cooldownInterval);
   }
 
   get activeBranchData(): Branch {
@@ -112,19 +129,43 @@ export class Contact {
     this.activeBranch = index;
   }
 
+  getOpenStatus(branch: Branch): 'Open now' | 'Closed' {
+    const now = new Date();
+    const roStr = now.toLocaleString('en-US', { timeZone: 'Europe/Bucharest' });
+    const ro = new Date(roStr);
+    const day = ro.getDay(); // 0=Sun, 1=Mon, …, 6=Sat
+    const mins = ro.getHours() * 60 + ro.getMinutes();
+    const openMins = branch.openHour * 60 + branch.openMinute;
+    const closeMins = branch.closeHour * 60 + branch.closeMinute;
+
+    if (branch.weekdaysOnly && (day === 0 || day === 6)) return 'Closed';
+    return mins >= openMins && mins < closeMins ? 'Open now' : 'Closed';
+  }
+
+  isOpen(branch: Branch): boolean {
+    return this.getOpenStatus(branch) === 'Open now';
+  }
+
   submitForm(): void {
+    if (this.formCooldown) return;
+
     this.formSent = true;
-    setTimeout(() => {
-      this.formSent = false;
-      this.form = {
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        subject: '',
-        message: '',
-      };
-    }, 4000);
+    this.formCooldown = true;
+    this.cooldownSeconds = 10;
+
+    this.cooldownInterval = setInterval(() => {
+      this.cooldownSeconds--;
+      if (this.cooldownSeconds <= 0) {
+        clearInterval(this.cooldownInterval!);
+        this.cooldownInterval = null;
+        this.formSent = false;
+        this.formCooldown = false;
+        this.form = {
+          firstName: '', lastName: '', email: '',
+          phone: '', subject: '', message: '',
+        };
+      }
+    }, 1000);
   }
 
   private safe(url: string): SafeResourceUrl {

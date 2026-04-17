@@ -1,0 +1,316 @@
+<!-- signup.component.html -->
+<div class="auth-page">
+
+  <!-- ── LEFT PANEL ─────────────────────────────────────────── -->
+  <div class="auth-panel auth-panel--visual">
+    <div class="auth-panel__bg">
+      <div class="auth-panel__bg-circle auth-panel__bg-circle--1"></div>
+      <div class="auth-panel__bg-circle auth-panel__bg-circle--2"></div>
+      <div class="auth-panel__bg-circle auth-panel__bg-circle--3"></div>
+      <div class="auth-panel__bg-grid"></div>
+    </div>
+
+    <!-- Logo / Brand -->
+    <a routerLink="/" class="auth-brand">
+      <div class="auth-brand__icon">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 13L4.5 8.5Q5.5 5.5 8 5L10 4.5L12 5Q14.5 5.5 15.5 8.5L17 13"
+                stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="6.5" cy="14" r="2" fill="white"/>
+          <circle cx="13.5" cy="14" r="2" fill="white"/>
+          <path d="M3.5 10.5h13" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="auth-brand__name">DriveNow</span>
+    </a>
+
+    <!-- Visual content -->
+    <div class="auth-visual">
+      <div class="auth-visual__headline animate-fadeInUp">
+        <h2 class="auth-visual__title">Join 15,000+<br>happy drivers</h2>
+        <p class="auth-visual__subtitle">
+          Create your free account in under a minute<br>and get 10% off your first rental.
+        </p>
+      </div>
+
+      <!-- Perks list -->
+      <div class="auth-perks animate-fadeInUp delay-2">
+        <div class="auth-perk" *ngFor="let perk of perks">
+          <div class="auth-perk__icon">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2.5 7l3.5 3.5 5.5-6" stroke="white" stroke-width="1.6"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span class="auth-perk__text">{{ perk }}</span>
+        </div>
+      </div>
+
+      <!-- Review badge -->
+      <div class="auth-review animate-fadeInUp delay-3">
+        <div class="auth-review__stars">★★★★★</div>
+        <p class="auth-review__text">"Easiest rental I've ever done. 5 minutes from signup to booking."</p>
+        <div class="auth-review__author">— Maria I., Bucharest</div>
+      </div>
+    </div>
+
+    <!-- Bottom link -->
+    <p class="auth-panel__footer">
+      Already have an account?
+      <a routerLink="/login" class="auth-panel__footer-link">Sign in →</a>
+    </p>
+  </div>
+
+  <!-- ── RIGHT PANEL (FORM) ──────────────────────────────────── -->
+  <div class="auth-panel auth-panel--form">
+    <div class="auth-form-wrap animate-fadeInUp">
+
+      <!-- Header -->
+      <div class="auth-form-header">
+        <div class="auth-form-header__badge">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M7 1l1 3h3l-2.5 2 1 3L7 7.5 4.5 9l1-3L3 4h3z"
+                  fill="#FDE68A" stroke="#D97706" stroke-width="0.5"/>
+          </svg>
+          10% off your first rental
+        </div>
+        <h1 class="auth-form-header__title">Create account</h1>
+        <p class="auth-form-header__sub">Join DriveNow — it's free and takes a minute</p>
+      </div>
+
+      <!-- Google button -->
+      <button class="btn-google" (click)="signupWithGoogle()">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 009 18z" fill="#34A853"/>
+          <path d="M3.964 10.706A5.41 5.41 0 013.682 9c0-.593.102-1.17.282-1.706V4.962H.957A8.996 8.996 0 000 9c0 1.452.348 2.827.957 4.038l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 00.957 4.962L3.964 7.294C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <!-- Divider -->
+      <div class="auth-divider">
+        <span class="auth-divider__line"></span>
+        <span class="auth-divider__text">or sign up with email</span>
+        <span class="auth-divider__line"></span>
+      </div>
+
+      <!-- Form -->
+      <form class="auth-form" (ngSubmit)="onSignup()" novalidate>
+
+        <!-- Row: Full name + Username -->
+        <div class="auth-form__row">
+          <div class="form-group" [class.form-group--error]="errors.fullName">
+            <label for="fullName">Full name</label>
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="5.5" r="3" stroke="#94A3B8" stroke-width="1.3"/>
+                <path d="M2 14a6 6 0 0112 0" stroke="#94A3B8" stroke-width="1.3"
+                      stroke-linecap="round"/>
+              </svg>
+              <input
+                id="fullName"
+                class="form-control input-wrap__input"
+                type="text"
+                placeholder="John Doe"
+                [(ngModel)]="form.fullName"
+                name="fullName"
+                autocomplete="name"
+                (blur)="validateField('fullName')">
+            </div>
+            <span class="form-error" *ngIf="errors.fullName">{{ errors.fullName }}</span>
+          </div>
+
+          <div class="form-group" [class.form-group--error]="errors.username">
+            <label for="username">Username</label>
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="6.5" stroke="#94A3B8" stroke-width="1.3"/>
+                <path d="M5.5 9.5C5.5 9.5 6.5 11 8 11s2.5-1.5 2.5-1.5M6 6.5h.01M10 6.5h.01"
+                      stroke="#94A3B8" stroke-width="1.3" stroke-linecap="round"/>
+              </svg>
+              <input
+                id="username"
+                class="form-control input-wrap__input"
+                type="text"
+                placeholder="johndoe"
+                [(ngModel)]="form.username"
+                name="username"
+                autocomplete="username"
+                (blur)="validateField('username')">
+            </div>
+            <span class="form-error" *ngIf="errors.username">{{ errors.username }}</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group" [class.form-group--error]="errors.email">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12c.6 0 1 .4 1 1v6c0 .6-.4 1-1 1H2c-.6 0-1-.4-1-1V5c0-.6.4-1 1-1z"
+                    stroke="#94A3B8" stroke-width="1.3"/>
+              <path d="M1.5 4.5l6.5 4.5 6.5-4.5" stroke="#94A3B8" stroke-width="1.3"
+                    stroke-linecap="round"/>
+            </svg>
+            <input
+              id="email"
+              class="form-control input-wrap__input"
+              type="email"
+              placeholder="you@email.com"
+              [(ngModel)]="form.email"
+              name="email"
+              autocomplete="email"
+              (blur)="validateField('email')">
+          </div>
+          <span class="form-error" *ngIf="errors.email">{{ errors.email }}</span>
+        </div>
+
+        <!-- Phone -->
+        <div class="form-group" [class.form-group--error]="errors.phone">
+          <label for="phone">Phone number</label>
+          <div class="input-wrap">
+            <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M13.4 10.3l-2-1.5a1 1 0 00-1.3.1l-.7.7a7.1 7.1 0 01-3-3l.7-.7a1 1 0 00.1-1.3l-1.5-2A1 1 0 004.4 2L3 3.4C2.4 4 2.3 4.9 2.7 5.7a13 13 0 007.6 7.6c.8.4 1.7.3 2.3-.3l1.4-1.4a1 1 0 00-.6-1.3z"
+                    stroke="#94A3B8" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <input
+              id="phone"
+              class="form-control input-wrap__input"
+              type="tel"
+              placeholder="+40 7xx xxx xxx"
+              [(ngModel)]="form.phone"
+              name="phone"
+              autocomplete="tel"
+              (blur)="validateField('phone')">
+          </div>
+          <span class="form-error" *ngIf="errors.phone">{{ errors.phone }}</span>
+        </div>
+
+        <!-- Row: Password + Confirm -->
+        <div class="auth-form__row">
+          <div class="form-group" [class.form-group--error]="errors.password">
+            <label for="password">Password</label>
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#94A3B8" stroke-width="1.3"/>
+                <path d="M5 7V5a3 3 0 016 0v2" stroke="#94A3B8" stroke-width="1.3"
+                      stroke-linecap="round"/>
+              </svg>
+              <input
+                id="password"
+                class="form-control input-wrap__input"
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="Min 8 chars"
+                [(ngModel)]="form.password"
+                name="password"
+                autocomplete="new-password"
+                (blur)="validateField('password')">
+              <button type="button" class="input-wrap__toggle" (click)="showPassword = !showPassword">
+                <svg *ngIf="!showPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M1 8S3.5 3 8 3s7 5 7 5-2.5 5-7 5-7-5-7-5z"
+                        stroke="#94A3B8" stroke-width="1.3"/>
+                  <circle cx="8" cy="8" r="2" stroke="#94A3B8" stroke-width="1.3"/>
+                </svg>
+                <svg *ngIf="showPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 2l12 12M6.5 6.6A2 2 0 0010 9.5M4.2 4.3C2.6 5.4 1 8 1 8s2.5 5 7 5c1.4 0 2.6-.4 3.7-.9M7 3.1c.3 0 .7-.1 1-.1 4.5 0 7 5 7 5s-.7 1.4-2 2.7"
+                        stroke="#94A3B8" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <span class="form-error" *ngIf="errors.password">{{ errors.password }}</span>
+          </div>
+
+          <div class="form-group" [class.form-group--error]="errors.confirmPassword">
+            <label for="confirmPassword">Confirm password</label>
+            <div class="input-wrap">
+              <svg class="input-wrap__icon" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#94A3B8" stroke-width="1.3"/>
+                <path d="M5 7V5a3 3 0 016 0v2" stroke="#94A3B8" stroke-width="1.3"
+                      stroke-linecap="round"/>
+                <path d="M6 11l1.5 1.5 3-2.5" stroke="#94A3B8" stroke-width="1.3"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <input
+                id="confirmPassword"
+                class="form-control input-wrap__input"
+                [type]="showConfirmPassword ? 'text' : 'password'"
+                placeholder="Repeat password"
+                [(ngModel)]="form.confirmPassword"
+                name="confirmPassword"
+                autocomplete="new-password"
+                (blur)="validateField('confirmPassword')">
+              <button type="button" class="input-wrap__toggle"
+                      (click)="showConfirmPassword = !showConfirmPassword">
+                <svg *ngIf="!showConfirmPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M1 8S3.5 3 8 3s7 5 7 5-2.5 5-7 5-7-5-7-5z"
+                        stroke="#94A3B8" stroke-width="1.3"/>
+                  <circle cx="8" cy="8" r="2" stroke="#94A3B8" stroke-width="1.3"/>
+                </svg>
+                <svg *ngIf="showConfirmPassword" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M2 2l12 12M6.5 6.6A2 2 0 0010 9.5M4.2 4.3C2.6 5.4 1 8 1 8s2.5 5 7 5c1.4 0 2.6-.4 3.7-.9M7 3.1c.3 0 .7-.1 1-.1 4.5 0 7 5 7 5s-.7 1.4-2 2.7"
+                        stroke="#94A3B8" stroke-width="1.3" stroke-linecap="round"/>
+                </svg>
+              </button>
+            </div>
+            <span class="form-error" *ngIf="errors.confirmPassword">{{ errors.confirmPassword }}</span>
+          </div>
+        </div>
+
+        <!-- Password strength -->
+        <div class="password-strength" *ngIf="form.password">
+          <div class="password-strength__bars">
+            <div class="password-strength__bar"
+                 *ngFor="let i of [1,2,3,4]"
+                 [class.active]="passwordStrength >= i"
+                 [class]="'password-strength__bar password-strength__bar--' + strengthColor(i)">
+            </div>
+          </div>
+          <span class="password-strength__label" [class]="'text-strength-' + strengthColor(1)">
+            {{ strengthLabel }}
+          </span>
+        </div>
+
+        <!-- Terms -->
+        <label class="auth-checkbox" [class.auth-checkbox--error]="errors.terms">
+          <input type="checkbox" [(ngModel)]="form.terms" name="terms">
+          <span class="auth-checkbox__box"></span>
+          <span class="auth-checkbox__label">
+            I agree to the
+            <a href="#" class="auth-terms-link">Terms of Service</a>
+            and
+            <a href="#" class="auth-terms-link">Privacy Policy</a>
+          </span>
+        </label>
+        <span class="form-error" *ngIf="errors.terms">{{ errors.terms }}</span>
+
+        <!-- Error alert -->
+        <div class="auth-alert" *ngIf="signupError">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+            <circle cx="8" cy="8" r="6.5" stroke="#EF4444" stroke-width="1.3"/>
+            <path d="M8 5v3M8 10.5v.5" stroke="#EF4444" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+          {{ signupError }}
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn btn--primary btn--full auth-submit"
+                [class.auth-submit--loading]="isLoading" [disabled]="isLoading">
+          <span class="auth-submit__spinner" *ngIf="isLoading"></span>
+          <span *ngIf="!isLoading">Create Account</span>
+          <span *ngIf="isLoading">Creating account…</span>
+        </button>
+
+      </form>
+
+      <!-- Mobile footer link -->
+      <p class="auth-mobile-link">
+        Already have an account?
+        <a routerLink="/login">Sign in →</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>

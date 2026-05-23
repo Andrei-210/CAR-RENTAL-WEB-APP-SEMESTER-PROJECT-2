@@ -475,8 +475,3 @@ test('A06 - GET /reports/dashboard returns stats with valid admin token', async 
   expect(body).toHaveProperty('todayRevenue');
   expect(body.totalVehicles).toBeGreaterThan(0);
 });
-
-test.afterAll(async () => {
-  // mic buffer pentru cleanup
-  await new Promise(res => setTimeout(res, 100));
-});
